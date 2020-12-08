@@ -1,9 +1,7 @@
 // Design a lexical analyzer which contains getNextToken( ) for a simple C program to
 //create a structure of token each time and return, which includes row number, column
 //number and token type
-// Aadi Shantanu Deshpande
-// A- 46 (B2)
-// 180905402
+
 
 #include<stdio.h>
 #include<stdlib.h>

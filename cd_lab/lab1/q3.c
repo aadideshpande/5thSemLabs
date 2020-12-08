@@ -1,7 +1,4 @@
 // recognize all the keywords and print them in uppercase
-// Aadi Shantanu Deshpande
-// A - 46 (B2)
-// 180905402
 
 #include<stdio.h>
 #include<stdlib.h>

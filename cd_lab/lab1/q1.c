@@ -1,7 +1,4 @@
 // remove blanks and tabs from the given file
-// Aadi Shantanu Deshpande
-// A - 46 (B2)
-// 180905402
 
 #include<stdio.h>
 #include<stdlib.h>
