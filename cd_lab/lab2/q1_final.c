@@ -64,7 +64,7 @@ void fillToken(struct token* t, char c, int row, int col, char* type)
 	t->row = row;
 	t->col = col;
 	t->lexeme[0] = c;
-	t->lexeme[1] = '\n';
+	t->lexeme[1] = '\0';
 	strcpy(t->type, type);
 }
 
@@ -257,8 +257,10 @@ struct token getNextToken(FILE *f1)
 				tkn.lexeme[pos++] = c;
 				col++;
 			}
+			tkn.lexeme[pos++] = c;
 			tkn.lexeme[pos] = '\0';
 			gotToken = 1;
+			strcpy(tkn.type, "string");
 		}
 		else if(c == '<' || c == '>' || c == '!')
 		{
@@ -311,7 +313,7 @@ struct token getNextToken(FILE *f1)
 		
 int main()
 {
-	FILE *f1 = fopen("sample.c", "r");
+	FILE *f1 = fopen("example.c", "r");
 	if(f1 == NULL)
 	{
 		printf(" file opening error \n");
