@@ -1,3 +1,9 @@
+//Lab1 q2
+
+//Write a TCP client which sends a string to a server program. Server displays the string along with
+//client IP and ephemeral port number. Server then responds to the client by echoing back the string
+//in uppercase. The process continues until one of them types “QUIT”.
+
 #include <stdio.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -65,14 +71,16 @@ int main()
 	{
 		printf("socket bind failed...\n");
 		exit(0);
-	}else
+	}
+	else
 		printf("Socket successfully binded..\n");
 	// Now server is ready to listen and verification
 	if ((listen(sockfd, 5)) != 0) 
 	{
 		printf("Listen failed...\n");
 		exit(0);
-	}else
+	}
+	else
 		printf("Server listening..\n");
 	len = sizeof(cli);
 	// Accept the data packet from client and verification

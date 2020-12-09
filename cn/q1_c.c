@@ -1,8 +1,5 @@
 // LAB1, Q1
-// 
-// Aadi Shantanu Deshpande
-// 180905402
-// A - 46 (B2)
+
 
 //Write a UDP client-server program where client sends rows of a matrix to the server combines
 //them together as a two dimensional matrix and display the same.
