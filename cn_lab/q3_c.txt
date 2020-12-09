@@ -1,0 +1,51 @@
+// tcp concurrent client
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <ctype.h>
+
+int main()
+{
+	int sd, nd, n, result, n1;
+	int x, y, ans;
+	char op;
+	unsigned int len;
+	struct sockaddr_in server, client;
+	
+	sd = socket(AF_INET, SOCK_STREAM, 0);
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons(10200);
+	len = sizeof(server);
+	
+	connect(sd, (struct sockaddr*)&server, len);
+	
+	printf("enter the first number: ");
+	scanf("%d", &x);
+	write(sd, &x, sizeof(x));
+	
+	printf("enter the second number: ");
+	scanf("%d", &y);
+	write(sd, &y, sizeof(y));
+	
+	
+	printf("enter the operation to perform: ");
+	scanf("%s", &op);
+	write(sd, &op, sizeof(op));
+	
+	
+	read(sd, &ans, sizeof(ans));	
+	printf("the answer is: %d \n", ans);
+	getchar();
+
+}
+

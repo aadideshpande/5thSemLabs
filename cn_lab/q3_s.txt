@@ -1,0 +1,93 @@
+// tcp concurrent server
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <ctype.h>
+
+int main()
+{
+	int sd, nd, result;
+	unsigned int len;
+	int a, b, ans;
+	char op;
+	struct sockaddr_in server, client;
+	char buf[256];
+	sd = socket(AF_INET, SOCK_STREAM, 0);
+	
+	server.sin_family = AF_INET;
+	server.sin_addr.s_addr = INADDR_ANY;
+	server.sin_port = htons(10200);
+	
+	bind(sd, (struct sockaddr*)&server, sizeof(server));
+	listen(sd, 5);
+	len = sizeof(client);
+	
+	while(1)
+	{
+		// nd: the first connection request
+		nd = accept(sd, (struct sockaddr*)&client, &len);
+	
+	
+		if(fork() == 0) // means child process is running
+		{
+			close(sd);
+		}	
+		
+
+			read(nd, &a, sizeof(a));
+			read(nd, &b, sizeof(b));
+			read(nd, &op, sizeof(op));
+		
+			printf("received: a = %d, b = %d \n", a, b);
+		
+			
+			switch(op)
+			{
+				case '+':
+					ans = a + b;
+					break;
+				case '-':
+					ans = a - b;
+					break;
+				case '*':
+					ans = a * b;
+					break;
+				case '/':
+					ans = a / b;
+					break;
+			}
+			/*
+			if(op == '+')
+			{
+				ans = a + b;
+			}
+			else if(op == '-')
+			{
+				ans = a -b;
+			}
+			else if(op == '*')
+			{
+				ans = a * b;
+			}
+			else if(op == '/')
+			{
+				ans = a / b;
+			}
+			*/
+			
+			write(nd, &ans, sizeof(ans));
+			getchar();
+			break;
+	}
+	close(nd);
+}
+
