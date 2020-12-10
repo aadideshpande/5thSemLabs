@@ -5,6 +5,28 @@
 #include<ctype.h>
 #define tableLength 30
 // define structure of the token
+
+int findSize(char* str)
+{
+	if(strcmp(str, "int") == 0)
+	{
+		return 4;
+	}
+	else if(strcmp(str, "char") == 0)
+	{
+		return 1;
+	}
+	else if(strcmp(str, "float") == 0)
+	{
+		return 8;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+typedef struct token* Tokenptr;
 struct token
 {
 	char lexeme[128];
@@ -13,14 +35,14 @@ struct token
 };
 
 //for the symbol table
-typedef struct listElement* listPtr; 
-struct listElement
+typedef struct tableName* tableNameptr;
+struct tableName
 {
-	struct token tok;
-	listPtr next;
+	Tokenptr tok;
+	Tokenptr list[5];
 };
 
-listPtr TABLE[tableLength];
+tableNameptr TABLE[tableLength];
 
 void initialize()
 {
@@ -30,27 +52,141 @@ void initialize()
 	}
 }
 
-int m = 0;
-
-listPtr createTable(struct token tkn)
+void initialize2(int num)
 {
-	return NULL;
+	for(int i = 0; i < 5; i++)
+	{
+		TABLE[num]->list[i] = NULL;
+	}
 }
 
-void addTable(struct token tkn, int c, char* dbuf)
+int m = 0;
+
+void createTable(Tokenptr tkn)
 {
-	// check whether the token is a variablename
-	// then we create a symbol table
-	if(c == '(')
+			//printf("token lexeme is: %s \n", tkn->lexeme);
+	int newTable = false;
+	for(int i = 0; i < tableLength; i++)
 	{
-		int flag = 0;
-		createTable(tkn);
+		if(TABLE[i] == NULL)
+		{
+
+			newTable = true;
+			break;
+		}
+		else
+		{
+			//int
+			char* name = TABLE[i]->tok->lexeme;
+			if(strcmp(name, tkn->lexeme) == 0)
+			{
+				//printf("this lexeme is already present as a function\n");
+			}
+		}
 	}
-	else
+
+	if(newTable)
 	{
-		int a =2;
+				//printf("token lexeme is: %s \n", tkn->lexeme);
+		int pos = -1;
+		for(int i = 0; i < tableLength; i++)
+		{
+			if(TABLE[i] == NULL)
+			{
+
+				pos = i;
+				TABLE[i] = (tableNameptr)malloc(sizeof(struct tableName));
+				TABLE[i]->tok = tkn;
+				initialize2(i);
+				//printf("here inside with pos = %d \n", pos);
+				break;
+			}
+		}
+				//printf("token lexeme is: %s \n", tkn->lexeme);
+		//tableNameptr newFun;
+		//newFun->tok = tkn;
+		//printf("token lexeme before is: %s \n", tkn->lexeme);
+		//TABLE[pos]->tok = tkn;
+		//printf("token lexeme after is: %s \n", TABLE[pos]->tok->lexeme);
 	}
-		
+}
+
+void browseTable()
+{
+	//printf("here\n");
+	for(int i = 0; i < tableLength; i++)
+	{
+		if(TABLE[i] == NULL)
+		{
+			break;
+		}
+		else
+		{
+			//printf("here 2\n");
+			for(int j = 0; j < 5; j++)
+			{
+				Tokenptr tp =  TABLE[i]->list[j];
+				if(tp == NULL)
+				{
+					//printf("here 2\n");
+					break;
+				}
+				else
+				{
+
+					printf("%s \t %s \t %d \n", tp->lexeme, tp->type, findSize(tp->type));
+				}
+			}
+		}
+	}
+}
+				
+
+// add a new variable to the table
+void addTable(Tokenptr tkn, char* dbuf, Tokenptr func_token)
+{
+
+	// first we find the pointer to the  correct table
+	int pos = 0;
+	for(int i = 0; i < tableLength; i++)
+	{
+		if(strcmp(TABLE[i]->tok->lexeme, func_token->lexeme) == 0)
+		{
+			pos = i;
+			break;
+		}
+	}
+
+	for(int j = 0; j < 5; j++)
+	{
+		if(TABLE[pos]->list[j] != NULL)
+		{
+						//printf("here 2\n");
+			if(strcmp(TABLE[pos]->list[j]->lexeme,tkn->lexeme) == 0)
+			{
+				//printf("already present in the table \n");
+				break;
+			}
+		}
+		if(TABLE[pos]->list[j] == NULL)
+		{
+
+			TABLE[pos]->list[j] = (Tokenptr)malloc(sizeof(struct token));
+			TABLE[pos]->list[j] = tkn;
+			break;
+		}
+	}
+
+	//printf("%s is a variablename of type %s \n", tkn->lexeme, dbuf);
+}
+
+int isIPfunction(char* str)
+{
+	if((strcmp(str,"printf") == 0) || (strcmp(str, "scanf") == 0))
+	{
+		return 1;
+	}
+	return 0;
 }
 
 int row = 1, col = 1;
@@ -67,6 +203,19 @@ const char* datatypes[]  = {"int", "float", "double", "char", "long"};
 
 const char arithmetic_symbols[] = {'*', '/'};
 
+int isDatatype(char* str)
+{
+	int len = sizeof(datatypes) / sizeof(char *); 
+	for(int i = 0; i < len; i++)
+	{
+		if(strcmp(str, datatypes[i]) == 0)
+		{
+			return 1;
+		}
+	}
+	return 0;
+}
+
 int isKeyword(char* str)
 {
 	int len = sizeof(keywords) / sizeof(char *); 
@@ -79,6 +228,7 @@ int isKeyword(char* str)
 	}
 	return 0;
 }
+
 
 int charBelongs(int c, const char* arr)
 {
@@ -103,6 +253,56 @@ int charBelongs(int c, const char* arr)
 }
 
 
+struct token checkforalpha(FILE* f1)
+{
+	token tkn;
+	int pos = 0;
+	char c = fgetc(f1);
+	char dbuf[32];
+	int gotToken = 1;
+
+	//printf("the value of c is: %c \n" , c); 
+	while(c != EOF && isalnum(c))
+	{
+		tkn.lexeme[pos++] = c;
+		col++;
+		c = fgetc(f1);
+	}
+	tkn.lexeme[pos] = '\0';
+	//printf("the value of lexeme is: %s \n" , tkn.lexeme); 
+	if(isKeyword(tkn.lexeme))
+	{
+		strcpy(tkn.type, "keyword");
+	}
+	else
+	{
+		//printf("the value of c is: %c \n" , c); 
+		strcpy(tkn.type, "identifier");
+	}
+	gotToken = 1;
+			//printf("here again \n"); 
+	fseek(f1, -1, SEEK_CUR);
+	//printf("the value of c is: %c \n" , c);
+
+	int isDT = 0;
+	if(isDatatype(tkn.lexeme))
+	{
+		int len = sizeof(datatypes) / sizeof(char *); 
+		for(int i = 0; i < len; i++)
+		{
+			if(strcmp(tkn.lexeme, datatypes[i]) == 0)
+			{
+				isDT = 1;
+				//strcpy
+				strcpy(dbuf, datatypes[i]);
+				strcpy(tkn.type, datatypes[i]);
+				break;
+			}
+		}
+	}
+	return tkn;
+}
+
 void fillToken(struct token* t, char c, int row, int col, char* type)
 {
 	t->row = row;
@@ -117,6 +317,8 @@ struct token getNextToken(FILE *f1)
 
 	struct token tkn;
 	tkn.row = -1;
+	char dbuf[32];
+	char buf[32];
 	int c, gotToken = 0;
 	c = fgetc(f1);
 	while(!gotToken && c != EOF)
@@ -208,13 +410,15 @@ struct token getNextToken(FILE *f1)
 			strcpy(tkn.type, "number");
 			gotToken = 1;
 			fseek(f1, -1, SEEK_CUR);
-		}
-		else if(c == '#')
+		*/
+		if(c == '#')
 		{
 			while((c = fgetc(f1)) != EOF && c != '\n');
 			row++;
 			col = 1;
 		}
+
+		/*
 		else if(c == '\n')
 		{
 			row++;
@@ -231,9 +435,9 @@ struct token getNextToken(FILE *f1)
 		{
 			col++;
 		}
-		
 		*/
-		if(isalpha(c) || c == '_')
+		
+		else if(isalpha(c) || c == '_')
 		{
 			//printf("here \n");
 			tkn.row = row;
@@ -263,12 +467,81 @@ struct token getNextToken(FILE *f1)
 					//printf("here again \n"); 
 			fseek(f1, -1, SEEK_CUR);
 			//printf("the value of c is: %c \n" , c);
-			 
-		}
-		else
-		{
+
+			int isDT = 0;
+			if(isDatatype(tkn.lexeme))
+			{
+				int len = sizeof(datatypes) / sizeof(char *); 
+				for(int i = 0; i < len; i++)
+				{
+					if(strcmp(tkn.lexeme, datatypes[i]) == 0)
+					{
+						isDT = 1;
+						//strcpy
+						strcpy(dbuf, datatypes[i]);
+						break;
+					}
+				}
+			}
+
 			c = fgetc(f1);
-			col++;
+			
+			// if the lexeme is a function
+			if(!isIPfunction(tkn.lexeme) && c == '(' )
+			{
+				Tokenptr t = &tkn;
+				createTable(t);
+
+				//printf("token pointing to %s \n", t->lexeme);
+				// check for closing brackets
+				char* parameter_type;
+				int param = false;
+				while(c != EOF && c != ')')
+				{
+					token newtkn = checkforalpha(f1);
+					if(strcmp(newtkn.lexeme, " ") != 0 && strcmp(newtkn.lexeme, "int") != 0)
+					{
+						//printf("%s \t %s \t %d \n", newtkn.lexeme, dbuf, findSize(newtkn.type));
+						strcpy(newtkn.type, dbuf);
+						//printf("newtkn is %s  and type is %s\n", newtkn.lexeme, dbuf);
+						addTable(&newtkn, dbuf, t);
+					}
+					c = fgetc(f1);
+					/*
+					if(strcmp(newtkn.type, "identifier") == 0)
+					{
+						if(param)
+						{
+							addTable(&newtkn, parameter_type, &newtkn);
+						}
+						else
+						{
+							strcpy(dbuf, "int");
+							addTable(&newtkn, dbuf, &newtkn);
+						}
+					}
+					else
+					{
+						strcpy(parameter_type, newtkn.type);
+						param = true;
+
+					}
+					c = fgetc(f1);
+					*/
+				}
+
+				if(c == '{')
+				{
+					while(c != EOF && c != '}')
+					{
+						printf("done \n");
+						c = fgetc(f1);
+					}
+				}
+				//printf("lexeme %s is a function \n", tkn.lexeme);
+
+			}
+			 
 		}
 		
 		/*
@@ -302,6 +575,7 @@ struct token getNextToken(FILE *f1)
 				fseek(f1, -1, SEEK_CUR); 
 			}
 		}
+		*/
 		else if(c == '"')
 		{
 			tkn.row = row;
@@ -318,6 +592,13 @@ struct token getNextToken(FILE *f1)
 			gotToken = 1;
 			strcpy(tkn.type, "string");
 		}
+		else
+		{
+			c = fgetc(f1);
+			col++;
+		}
+
+		/*
 		else if(c == '<' || c == '>' || c == '!')
 		{
 				fillToken(&tkn, c, row, col, "relational_op");
@@ -373,6 +654,7 @@ struct token getNextToken(FILE *f1)
 		
 int main()
 {
+	initialize();
 	FILE *f1 = fopen("example.c", "r");
 	if(f1 == NULL)
 	{
@@ -383,9 +665,10 @@ int main()
 	while(tkn.row != -1)
 	{
 		
-		printf("<%s, %d, %d, %s>\n", tkn.lexeme, tkn.row, tkn.col, tkn.type);
+		//printf("<%s, %d, %d, %s>\n", tkn.lexeme, tkn.row, tkn.col, tkn.type);
 		tkn = getNextToken(f1);
 	}
+    browseTable();
 	fclose(f1);
 }			
 		
