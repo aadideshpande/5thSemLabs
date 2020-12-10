@@ -197,7 +197,7 @@ const char special_symbols[] = {'!', '$', '%', '^', '(',
 								',', '.'};
 const char* keywords[] = {"int", "return", "for", "while", "do",
 							"else", "case", "break", "unsigned",
-							"const"};
+							"const", "scanf", "printf"};
 
 const char* datatypes[]  = {"int", "float", "double", "char", "long"};
 
@@ -651,7 +651,44 @@ struct token getNextToken(FILE *f1)
 	return tkn;
     
 }		
-		
+
+struct token alphaChecker(FILE* f1)
+{
+	char buffer[32];
+	int i = 0;
+	int c;
+	c = fgetc(f1);
+	while(c != EOF)
+	{
+		if(c == '#')
+		{
+			while(c != '\n')
+			{
+				c = fgetc(f1);
+			}
+		}
+
+
+		if(isalpha(c))
+		{
+			buffer[i++] = c;
+			c = fgetc(f1);
+			while(c != EOF && isalpha(c))
+			{
+				buffer[i++] = c;
+				c = fgetc(f1);
+			}
+			buffer[i] = '\0';
+		    //printf("%s \n", buffer);
+
+			
+
+
+		    i = 0;
+		}
+		c = fgetc(f1);
+	}
+}	
 int main()
 {
 	initialize();
@@ -662,6 +699,11 @@ int main()
 		return 0;
 	}
 
+	//struct token tkn = getNextToken(f1);
+	alphaChecker(f1);
+	
+
+	/*
 	struct token tkn = getNextToken(f1);
 	while(tkn.row != -1)
 	{
@@ -669,7 +711,8 @@ int main()
 		//printf("<%s, %d, %d, %s>\n", tkn.lexeme, tkn.row, tkn.col, tkn.type);
 		tkn = getNextToken(f1);
 	}
-    browseTable();
+	*/
+    //browseTable();
 	fclose(f1);
 }			
 		
