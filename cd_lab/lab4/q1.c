@@ -524,7 +524,6 @@ struct token getNextToken(FILE *f1)
 					{
 						strcpy(parameter_type, newtkn.type);
 						param = true;
-
 					}
 					c = fgetc(f1);
 					*/
@@ -672,7 +671,3 @@ int main()
     browseTable();
 	fclose(f1);
 }			
-		
-	
-	
-
