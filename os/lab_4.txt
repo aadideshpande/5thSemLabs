@@ -1,0 +1,142 @@
+Q1)Write a program to find the inode number of an existing file in a directory. Take the input as a filename and print the inode number of the file
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+void main(int argc, char *argv[])
+{
+	char d[50];
+	if (argc == 2)
+	{
+		bzero(d, sizeof(d));
+		strcat(d, "ls ");
+		strcat(d, "-i ");
+		strcat(d, argv[1]);
+		system(d);
+	}
+	else
+		printf("\nInvalid No. of inputs");
+}
+
+
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+int main(int argc, char *argv[])
+{
+	struct stat file_stats;
+
+	if (argc != 2)
+		fprintf(stderr, "Usage: fstat FILE...\n"), exit(EXIT_FAILURE);
+
+	if ((stat(argv[1], &file_stats)) == -1)
+	{
+		perror("fstat");
+		return 1;
+	}
+
+	printf("filename: %s\n", argv[1]);
+	printf(" device: %lld\n", file_stats.st_dev);
+	printf(" inode: %ld\n", file_stats.st_ino);
+	printf(" protection: %o\n", file_stats.st_mode);
+	printf(" number of hard links: %d\n", file_stats.st_nlink);
+	printf(" user ID of owner: %d\n", file_stats.st_uid);
+	printf(" group ID of owner: %d\n", file_stats.st_gid);
+	printf(" device type (if inode device): %lld\n", file_stats.st_rdev);
+	printf(" total size, in bytes: %ld\n", file_stats.st_size);
+	printf(" blocksize for filesystem I/O: %ld\n", file_stats.st_blksize);
+	printf(" number of blocks allocated: %ld\n", file_stats.st_blocks);
+	printf(" time of last access: %ld : %s", file_stats.st_atime, ctime(&file_stats.st_atime));
+	printf(" time of last modification: %ld : %s", file_stats.st_mtime, ctime(&file_stats.st_mtime));
+	printf(" time of last change: %ld : %s", file_stats.st_ctime, ctime(&file_stats.st_ctime));
+
+	return 0;
+}
+
+Q3) Write a program to create a new hard link to an existing file and unlink the same. Accept the old path as input and print the newpath.
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+	struct stat sb;
+	int ret;
+	if (argc < 2)
+	{
+		fprintf(stderr, "usage : %s <file>\n", argv[0]);
+		return 1;
+	}
+	puts("before link()");
+	system("ls -il test.*");
+	ret = link(argv[1], argv[2]);
+	if (ret)
+	{
+		perror("link error");
+		return 1;
+	}
+	else
+	{
+		puts("after link()");
+		system("ls -il test.*");
+	}
+	ret = unlink(argv[1]);
+	if (ret)
+	{
+		perror("unlink error");
+		return 1;
+	}
+	else
+	{
+		puts("after first unlink()");
+		system("ls -il test.*");
+	}
+}
+
+Q4) Write a program to create a new soft link to an existing file and unlink the same. Accept the old path as input and print the newpath.
+
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+	struct stat sb;
+	int ret;
+	if (argc < 2)
+	{
+		fprintf(stderr, "usage : %s <file>\n", argv[0]);
+		return 1;
+	}
+	puts("before symlink()");
+	system("ls -il test.*");
+	ret = symlink(argv[1], argv[2]);
+	if (ret)
+	{
+		perror("symlink error");
+		return 1;
+	}
+	else
+	{
+		puts("after symlink()");
+		system("ls -il test.*");
+	}
+	ret = unlink(argv[1]);
+	if (ret)
+	{
+		perror("unlink error");
+		return 1;
+	}
+	else
+	{
+		puts("after first unlink()");
+		system("ls -il test.*");
+	}
+}
